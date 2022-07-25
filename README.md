@@ -232,5 +232,5 @@ Here we use HttpUploadAgent, very useful for csv conversion. We enter the sink c
 Run, print your agent and congratulations ! You have created your first agent ! 
 
 # Handle the NGSI-LD errors
-When you have pyngsild bugs you can refer to the common errors right [here](https://ngsildclient.readthedocs.io/en/latest/client.html#mapping-to-ngsi-ld-api-errors).
+When you have a NGSI-LD problem you can refer to the common errors right [here](https://ngsildclient.readthedocs.io/en/latest/client.html#mapping-to-ngsi-ld-api-errors).
 
