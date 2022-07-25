@@ -1,5 +1,5 @@
 # Overview
-This content is an extra tutorial of *pyngsild tutorial* and *ngsildclient tutorial *done by Fabien BATTELLO.
+This content is an extra tutorial of *pyngsild tutorial* and *ngsildclient tutorial* done by Fabien BATTELLO.
 
 You can find the full tutorial here :
 https://github.com/Orange-OpenSource/pyngsild
@@ -20,7 +20,7 @@ It is made by a beginner (Ilona GERARD) for beginners !
 **Pyngsild** is a Python data-centric framework, in Python it is represented by a library. It helps to create NGSI-LD agents.
 You can see it as a set of molds to handle data. In a mold (an agent) there is an input (the source) and an output (the sink). According to your needs, the input and the output can vary from one mold to another. 
 
-Pyngsild uses **ngsildclient** to create the agents. The process between the sink and the source is the build of the entities, it is well explained in the link above. In our example, an entity is a material among many others in the mold to create the the structure of the agent.
+Pyngsild uses **ngsildclient** to create the agents. The process between the sink and the source is the build of the entities, it is well explained in the link above. In our example, an entity is a material among many others in the mold to create the structure of the agent.
 
 Check the [How it Works](https://github.com/Orange-OpenSource/pyngsild#how-it-works) part of the tutorial, it is well explain !
 
@@ -62,9 +62,9 @@ Here is our aim :
 
 Collect all the data of the csv file and feed him to the OffStreetParking API (OSP API). We may encounter some problems that we will try to raise in this tuto.
 
-First, all the columns of the BNLC csv do not have a correspondence with an attribute of OffStreetParking API. For example, the *“insee”* code available in the BNLC do not have any attribute equivalent in the OffStreetParking which mean that we will have to complete the API with *new attributes*.
+First, all the columns of the BNLC csv do not have a correspondence with an attribute of OffStreetParking API. For example, the *“insee”* code available in the BNLC do not have any equivalent in the OffStreetParking which mean that we will have to complete the API with *new attributes*.
 
-Another important thing is to understand what we are calling, where do you want to get the info ? In our example it is relatively accessible because we just have to split all the columns but in some cases like getting the info from an API, it can be more complicated. We will illustrate it with an example.
+Another important thing is to understand what we are calling, where do you want to get the info ? In our example it is relatively accessible because we just have to split all the columns of the file but in some cases like getting the info from another API, it can be more complicated. We will illustrate it with an example later.
 
 The agent creation could be done differently by calling [the API](https://transport.data.gouv.fr/api/datasets/5d6eaffc8b4c417cdc452ac3) of the BNLC available of the on their website, but especially for csv files, it is easier to split the column to create our Entity.
 
@@ -87,7 +87,7 @@ pip install pyngsild
 ```python
 pip install ngsildclient
 ```
-You will always need to import theses libraries, I recommend to import the whole library for and easier use. 
+You will always need to import theses libraries, I recommend to import the whole library for an easier use. 
 ```python
 from pyngsild import * 
 from ngsildclient import *
@@ -107,7 +107,7 @@ You have everything now to create your agent !
 There is 3 different way to get a sink:
 - Create your own sink [(here)](https://github.com/Orange-OpenSource/pyngsild#create-a-source)
 
-- Connect to a pyngsild sink already created [(here)](https://pixel-ports.github.io/pyngsi-tutorial.html#Chapter-5-:-Datasources) (the option we are going to do). Here we use the Sinkngsi() which is connected on the 8080 port to a proxy created for the use of pyngsild called “proxyld”.
+- Connect to a pyngsild sink already created [(here)](https://pixel-ports.github.io/pyngsi-tutorial.html#Chapter-5-:-Datasources) (the option we are going to do). Here we use the Sinkngsi() function which is connected on the 8080 port to a proxy created for the use of pyngsild called “proxyld”.
 ```python
 sink = SinkNgsi("proxyld", 8080)
 ```
@@ -182,7 +182,7 @@ e = Entity("OffStreetParking", id_lieu.strip('"'))
 ```
 We use the *Entity()* function of *ngsildclient*. We create the entity of the ‘OffStreetParking’ API and the main key will be id_lieu (this is the key written on the doc on the BNLC website)
 
-To call an attribute of a csv file we just have to call it. The *strip()* function use after it is to pull the quote out. We will do it each time we call an argument, otherwise we also get it and it can create bugs mostly when we are not pushing in the api strings. We manipulate others Python or Pyngsild types like floats, integers, tuples, **geoProperty**, etc.
+To call an attribute of a csv file we just have to call it. The *strip()* function use after it is to pull the quote out. We will do it each time we call an argument, otherwise we also get it and it can create bugs mostly when we are not pushing in the api strings. We manipulate other Python or Pyngsild types like floats, integers, tuples, **geoProperty**, etc.
 
 ```python
 #Attributes already existing in OffStreetParking
@@ -192,9 +192,9 @@ To call an attribute of a csv file we just have to call it. The *strip()* functi
 ```
 Let’s focus now on [ngsildclient **properties**](https://ngsildclient.readthedocs.io/en/latest/build.html#add-properties). It is well explained on the main doc so I recommend you to read it.
 
-You have to call the property with the same as the output.
+You have to call the property with the same name as the output.
 
-You can find the properties you will need on the [OffStreetParking swagger](https://swagger.lab.fiware.org/?url=https://smart-data-models.github.io/dataModel.Parking/OffStreetParking/swagger.yaml). For example, to feed the attribute ‘location’ we need coordinates, for that you must *import GeoJson Point* (imported at the beginning of the doc ). We can see in the columns name of the csv that we have *Xlong* and *Xlat* attributes. Perfect ! We can give theses coordinates to the attribute location. Because it is a GeoProp we use the *gprop()* function. 
+You can find the properties you will need on the [OffStreetParking swagger](https://swagger.lab.fiware.org/?url=https://smart-data-models.github.io/dataModel.Parking/OffStreetParking/swagger.yaml). For example, to feed the attribute ‘location’ we need coordinates, for that you must *import GeoJson Point* (imported at the beginning of the doc ). We can see in the columns name of the csv that we have *Xlong* and *Xlat* attributes. Perfect ! We can give theses coordinates to the attribute location. Because it is a GeoProp we use the [*gprop()*](https://ngsildclient.readthedocs.io/en/latest/build.html#geoproperty) function. 
 
 ```python
 #New Attributes
@@ -218,7 +218,7 @@ The Build Entity function will build the NGSI-LD entities for each line of the c
 
 ## Create the agent 
 
-The entities are created, now you have to create the agent
+The entities are created, now you have to create and run the agent by calling your new function.
 ```python
 agent = HttpUploadAgent(sink=sink, process=build_entity)
 agent.run()
