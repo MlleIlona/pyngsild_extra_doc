@@ -94,7 +94,6 @@ from ngsildclient import *
 ```
 Here are the other libraries you will need for this tutorial
 ```python
-from pyexpat.errors import XML_ERROR_ATTRIBUTE_EXTERNAL_ENTITY_REF
 from pyngsild.agent.bg.http_upload import HttpUploadAgent
 from geojson import Point
 
@@ -122,29 +121,31 @@ As we said, to convert the date received in input we need to create the material
 Let’s see how it is laid out !
 ```python
 def build_entity(row: Row) -> Entity:
-	id_lieu, id_local, nom_lieu, ad_lieu, com_lieu, insee, type, date_maj, ouvert, source, Xlong, Xlat, nbre_pl, nbre_pmr, duree, horaires, proprio, lumiere, comm = row.record.split(",")
-	e = Entity("OffStreetParking", id_lieu.strip('"')) 
+    id_lieu, id_local, nom_lieu, ad_lieu, com_lieu, insee, type, date_maj, ouvert, source, Xlong, Xlat, nbre_pl, nbre_pmr, duree, horaires, proprio, lumiere, comm = row.record.split(",")
+    row.record.replace('"', '').split(",")
+    e = Entity("Covoiturage", id_lieu) 
 
-	#Attributes already existing in OffStreetParking
-	e.tprop("observedDateTime", date_maj.strip('"') + "T11:00:00Z")
-	e.prop("totalSpotNumber", nbre_pl.strip('"'))
-	e.prop("adress", ad_lieu.strip('"') + " " + com_lieu.strip('"') + " " + nom_lieu.strip('"'))
-	e.gprop("location", Point((float(Xlong.strip('"')) ,float(Xlat.strip('"')))))
-	e.prop("maximumParkingDuration", duree.strip('"'))
-	e.prop("owner", proprio.strip('"'))
-	e.prop("openingHours", horaires.strip('"'))
-	e.prop("description", comm.strip('"'))
+    #Attributs existants dans OffStreetParking
+    e.tprop("observedDateTime", date_maj+ "T11:00:00Z")
+    e.prop("totalSpotNumber", nbre_pl)
+    e.prop("adress", ad_lieu + " " + com_lieu + " " + nom_lieu)
+    lat, lon = float(Xlat), float(Xlong)
+    e.loc((lat, lon))
+    e.prop("maximumParkingDuration", duree)
+    e.prop("owner", proprio)
+    e.prop("openingHours", horaires)
+    e.prop("description", comm)
 
-	#New Attributes
-	e.prop("insee", insee)
-	e.prop("id_local", id_local)
-	e.prop("type", type)
-	e.prop("ouvert", ouvert)
-	e.prop("source", source)
-	e.prop("nbre_pmr", nbre_pmr)
-	e.prop("lumiere", lumiere)
+    #Nouveaux attributs
+    e.prop("insee", insee)
+    e.prop("id_local", id_local)
+    e.prop("type", type)
+    e.prop("ouvert", ouvert)
+    e.prop("source", source)
+    e.prop("nbre_pmr", nbre_pmr)
+    e.prop("lumiere", lumiere)
 
-	return e
+    return e
 ### Create the function
 ```
 Let’s analyze the code.
@@ -166,6 +167,12 @@ There are two attributes to this object
 ```
 This is how is made our csv file. Each carshare location has an **”id_lieu”**, an **”id_local”**, etc. If the cell is empty there is only a quote mark “ ”.
 
+### Pull the quotes back
+We can see on the csv file that there is quotes in each columns. To change it for each column we add this line.
+```python
+row.record.replace('"', '').split(",")
+```
+
 ### Split the csv columns
 ```python
 id_lieu, id_local, nom_lieu, ad_lieu, com_lieu, insee, type, date_maj, ouvert, source, Xlong, Xlat, nbre_pl, nbre_pmr, duree, horaires, proprio, lumiere, comm = row.record.split(",")
@@ -178,23 +185,24 @@ Also, you can see that the columns on the csv are separated by a comma. Sometime
 
 ### Create the Entity
 ```python
-e = Entity("OffStreetParking", id_lieu.strip('"')) 
+e = Entity("OffStreetParking", id_lieu) 
 ```
 We use the *Entity()* function of *ngsildclient*. We create the entity of the ‘OffStreetParking’ API and the main key will be id_lieu (this is the key written on the doc on the BNLC website)
 
-To call an attribute of a csv file we just have to call it. The *strip()* function use after it is to pull the quote out. We will do it each time we call an argument, otherwise we also get it and it can create bugs mostly when we are not pushing in the api strings. We manipulate other Python or Pyngsild types like floats, integers, tuples, **geoProperty**, etc.
+To call an attribute of a csv file we just have to call it by his name.
 
 ```python
 #Attributes already existing in OffStreetParking
-	e.tprop("observedDateTime", date_maj.strip('"') + "T11:00:00Z")
-	e.prop("totalSpotNumber", nbre_pl.strip('"'))
-	e.gprop("location", Point((float(Xlong.strip('"')) ,float(Xlat.strip('"')))))
+	e.tprop("observedDateTime", date_maj + "T11:00:00Z")
+	e.prop("totalSpotNumber", nbre_pl)
+	lat, lon = float(Xlat), float(Xlong)
+    	e.loc((lat, lon))
 ```
 Let’s focus now on [ngsildclient **properties**](https://ngsildclient.readthedocs.io/en/latest/build.html#add-properties). It is well explained on the main doc so I recommend you to read it.
 
 You have to call the property with the same name as the output.
 
-You can find the properties you will need on the [OffStreetParking swagger](https://swagger.lab.fiware.org/?url=https://smart-data-models.github.io/dataModel.Parking/OffStreetParking/swagger.yaml). For example, to feed the attribute ‘location’ we need coordinates, for that you must *import GeoJson Point* (imported at the beginning of the doc ). We can see in the columns name of the csv that we have *Xlong* and *Xlat* attributes. Perfect ! We can give theses coordinates to the attribute location. Because it is a GeoProp we use the [*gprop()*](https://ngsildclient.readthedocs.io/en/latest/build.html#geoproperty) function. 
+You can find the properties you will need on the [OffStreetParking swagger](https://swagger.lab.fiware.org/?url=https://smart-data-models.github.io/dataModel.Parking/OffStreetParking/swagger.yaml). For example, to feed the attribute ‘location’ we need coordinates. We can see in the columns name of the csv that we have *Xlong* and *Xlat* attributes. Perfect ! We can give theses coordinates to the attribute location. Because it is a GeoProp we use the [*gprop()*](https://ngsildclient.readthedocs.io/en/latest/build.html#geoproperty) function. 
 
 ```python
 #New Attributes
