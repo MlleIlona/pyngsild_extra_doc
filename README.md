@@ -121,8 +121,7 @@ As we said, to convert the date received in input we need to create the material
 Let’s see how it is laid out !
 ```python
 def build_entity(row: Row) -> Entity:
-    id_lieu, id_local, nom_lieu, ad_lieu, com_lieu, insee, type, date_maj, ouvert, source, Xlong, Xlat, nbre_pl, nbre_pmr, duree, horaires, proprio, lumiere, comm = row.record.split(",")
-    row.record.replace('"', '').split(",")
+    id_lieu, id_local, nom_lieu, ad_lieu, com_lieu, insee, type, date_maj, ouvert, source, Xlong, Xlat, nbre_pl, nbre_pmr, duree, horaires, proprio, lumiere, comm = row.record.replace('"', '').split(",")
     e = Entity("Covoiturage", id_lieu) 
 
     #Attributs existants dans OffStreetParking
@@ -167,21 +166,18 @@ There are two attributes to this object
 ```
 This is how is made our csv file. Each carshare location has an **”id_lieu”**, an **”id_local”**, etc. If the cell is empty there is only a quote mark “ ”.
 
-### Pull the quotes back
-We can see on the csv file that there is quotes in each columns. To change it for each column we add this line.
-```python
-row.record.replace('"', '').split(",")
-```
-
 ### Split the csv columns
 ```python
-id_lieu, id_local, nom_lieu, ad_lieu, com_lieu, insee, type, date_maj, ouvert, source, Xlong, Xlat, nbre_pl, nbre_pmr, duree, horaires, proprio, lumiere, comm = row.record.split(",")
+id_lieu, id_local, nom_lieu, ad_lieu, com_lieu, insee, type, date_maj, ouvert, source, Xlong, Xlat, nbre_pl, nbre_pmr, duree, horaires, proprio, lumiere, comm = row.record.replace('"', '').split(",")
 ```
 In our example, we want to get the info of each column separately to feed them in the right attribute of OffStreetParking. For that we use the *.record* to get the incoming data and *.split()* function to separate each column.
 
 You can illustrate each column of the csv as a box with a name such as “nom_lieu”. Each box contain the information of all the line of the csv. It means that “nom_lieu” has in his box all the location names of the carshare location.
 
-Also, you can see that the columns on the csv are separated by a comma. Sometimes it can be separated by a semi-colon, it depends of the file, it is a common error.
+Also, you can see that the columns on the csv are separated by a comma. Sometimes it can be separated by a semi-colon, it depends of the file, it is a common error. 
+
+We can see on the csv file that there is quotes in each columns. To change it for each column we add this line.
+
 
 ### Create the Entity
 ```python
